@@ -7,7 +7,7 @@ services:
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-pkghawk_redis_secret}
 
   app:
-    build: ..
+    image: ghcr.io/gopikannappan/pkghawk:latest
     restart: always
     ports:
       - "127.0.0.1:8000:8000"

@@ -1,21 +1,17 @@
 #!/bin/bash
-# Deploy pkghawk on the Hetzner server
-# Usage: ssh root@<server-ip> 'cd /opt/pkghawk && bash deploy/deploy.sh'
+# Deploy pkghawk by pulling the latest image from ghcr.io
+# Usage: cd /opt/pkghawk && bash deploy/deploy.sh
 
 set -euo pipefail
 
-echo "=== Pulling latest code ==="
-git pull origin main
+echo "=== Pulling latest image ==="
+docker pull ghcr.io/gopikannappan/pkghawk:latest
 
-echo "=== Building and starting containers ==="
-docker compose -f deploy/docker-compose.prod.yml build --no-cache
+echo "=== Restarting containers ==="
 docker compose -f deploy/docker-compose.prod.yml up -d
 
-echo "=== Reloading Nginx ==="
-nginx -t && systemctl reload nginx
-
 echo "=== Health check ==="
-sleep 3
+sleep 5
 STATUS=$(curl -sf http://127.0.0.1:8000/health | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])" 2>/dev/null || echo "error")
 echo "Health: $STATUS"
 
