@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pkghawk — Package Threat Feed</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #222;
+            padding-bottom: 1rem;
+        }
+        h1 { font-size: 1.5rem; color: #fff; }
+        h1 span { color: #f59e0b; }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-ok { background: #065f46; color: #6ee7b7; }
+        .badge-degraded { background: #78350f; color: #fbbf24; }
+        .badge-error { background: #7f1d1d; color: #fca5a5; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+        .stat-card .label { font-size: 0.75rem; color: #888; text-transform: uppercase; }
+        .stat-card .value { font-size: 1.75rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
+
+        .sources {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .sources h2 { font-size: 0.875rem; color: #888; margin-bottom: 1rem; text-transform: uppercase; }
+        .source-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .source-row:last-child { border-bottom: none; }
+        .source-name { font-weight: 500; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 0.5rem; }
+        .dot-ok { background: #10b981; }
+        .dot-error { background: #ef4444; }
+        .dot-unknown { background: #6b7280; }
+
+        .events { margin-bottom: 2rem; }
+        .events h2 { font-size: 0.875rem; color: #888; margin-bottom: 1rem; text-transform: uppercase; }
+        .event-card {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .event-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .severity-critical { color: #ef4444; }
+        .severity-high { color: #f59e0b; }
+        .severity-medium { color: #3b82f6; }
+        .severity-low { color: #6b7280; }
+        .severity-unknown { color: #6b7280; }
+        .event-package { font-weight: 700; color: #fff; }
+        .event-ecosystem { color: #888; font-size: 0.8rem; }
+        .event-summary { font-size: 0.875rem; color: #aaa; line-height: 1.4; }
+        .event-meta { font-size: 0.75rem; color: #555; margin-top: 0.5rem; }
+
+        .live-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #10b981;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        footer {
+            text-align: center;
+            color: #444;
+            font-size: 0.75rem;
+            padding-top: 2rem;
+            border-top: 1px solid #1a1a1a;
+        }
+        footer a { color: #888; text-decoration: none; }
+        footer a:hover { color: #fff; }
+
+        .connect-info {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .connect-info h2 { font-size: 0.875rem; color: #888; margin-bottom: 0.75rem; text-transform: uppercase; }
+        code {
+            background: #1a1a1a;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>pkg<span>hawk</span></h1>
+            <div>
+                <span class="live-dot"></span>
+                <span id="status-badge" class="badge badge-ok">Operational</span>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">Events (24h)</div>
+                <div class="value" id="events-24h">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Sources Active</div>
+                <div class="value" id="sources-active">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Last Event</div>
+                <div class="value" id="last-event" style="font-size:1rem">—</div>
+            </div>
+        </div>
+
+        <div class="sources">
+            <h2>Source Health</h2>
+            <div id="source-list">
+                <div class="source-row"><span class="source-name">Loading...</span></div>
+            </div>
+        </div>
+
+        <div class="events">
+            <h2>Recent Events</h2>
+            <div id="event-list">
+                <div class="event-card"><span class="event-summary">Loading...</span></div>
+            </div>
+        </div>
+
+        <div class="connect-info">
+            <h2>Connect</h2>
+            <p style="margin-bottom:0.5rem;font-size:0.875rem">
+                <strong>SSE:</strong> <code>curl -N /feed</code>
+            </p>
+            <p style="margin-bottom:0.5rem;font-size:0.875rem">
+                <strong>WebSocket:</strong> <code>wscat -c ws://host/ws</code>
+            </p>
+            <p style="margin-bottom:0.5rem;font-size:0.875rem">
+                <strong>REST:</strong> <code>curl /latest?n=20&ecosystem=npm</code>
+            </p>
+            <p style="font-size:0.875rem">
+                <strong>MCP:</strong> <code>{"mcpServers":{"pkghawk":{"url":"/mcp"}}}</code>
+            </p>
+        </div>
+
+        <footer>
+            <p>pkghawk &mdash; community infrastructure for the AI coding era</p>
+            <p style="margin-top:0.5rem"><a href="https://github.com/gk-monk/pkghawk">GitHub</a> &middot; MIT License</p>
+        </footer>
+    </div>
+
+    <script>
+        const BASE = window.location.origin;
+
+        async function fetchStats() {
+            try {
+                const res = await fetch(`${BASE}/stats`);
+                const data = await res.json();
+                document.getElementById('events-24h').textContent = data.events_24h ?? 0;
+                document.getElementById('sources-active').textContent = data.sources_active ?? 0;
+                document.getElementById('last-event').textContent = data.last_event
+                    ? new Date(data.last_event).toLocaleString()
+                    : 'None';
+            } catch { /* ignore */ }
+        }
+
+        async function fetchHealth() {
+            try {
+                const res = await fetch(`${BASE}/health`);
+                const data = await res.json();
+                const badge = document.getElementById('status-badge');
+                badge.textContent = data.status === 'ok' ? 'Operational' : 'Degraded';
+                badge.className = `badge badge-${data.status === 'ok' ? 'ok' : 'degraded'}`;
+
+                const list = document.getElementById('source-list');
+                const sources = data.sources || {};
+                if (Object.keys(sources).length === 0) {
+                    list.innerHTML = '<div class="source-row"><span class="source-name" style="color:#555">No sources reporting yet</span></div>';
+                    return;
+                }
+                list.innerHTML = Object.entries(sources).map(([name, info]) => `
+                    <div class="source-row">
+                        <span><span class="dot dot-${info.status === 'ok' ? 'ok' : 'error'}"></span><span class="source-name">${name}</span></span>
+                        <span style="color:#555;font-size:0.75rem">${info.last_check ? new Date(info.last_check * 1000).toLocaleTimeString() : ''}</span>
+                    </div>
+                `).join('');
+            } catch { /* ignore */ }
+        }
+
+        async function fetchEvents() {
+            try {
+                const res = await fetch(`${BASE}/latest?n=20`);
+                const events = await res.json();
+                const list = document.getElementById('event-list');
+                if (!events.length) {
+                    list.innerHTML = '<div class="event-card"><span class="event-summary" style="color:#555">No events yet</span></div>';
+                    return;
+                }
+                list.innerHTML = events.map(e => `
+                    <div class="event-card">
+                        <div class="event-header">
+                            <span class="badge severity-${e.severity}">${e.severity}</span>
+                            <span class="badge" style="background:#1e293b;color:#94a3b8">${e.type}</span>
+                            <span class="event-package">${e.package}</span>
+                            <span class="event-ecosystem">${e.ecosystem}</span>
+                        </div>
+                        <div class="event-summary">${e.summary || ''}</div>
+                        <div class="event-meta">${e.source} &middot; ${e.ts_iso || ''} &middot; confidence: ${e.confidence}</div>
+                    </div>
+                `).join('');
+            } catch { /* ignore */ }
+        }
+
+        // Live updates via SSE
+        function connectSSE() {
+            const es = new EventSource(`${BASE}/feed`);
+            es.onmessage = () => {
+                fetchStats();
+                fetchEvents();
+            };
+            es.onerror = () => {
+                setTimeout(connectSSE, 5000);
+                es.close();
+            };
+        }
+
+        fetchStats();
+        fetchHealth();
+        fetchEvents();
+        connectSSE();
+
+        // Refresh periodically
+        setInterval(fetchStats, 30000);
+        setInterval(fetchHealth, 60000);
+    </script>
+</body>
+</html>
