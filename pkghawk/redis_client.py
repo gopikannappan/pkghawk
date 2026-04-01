@@ -92,23 +92,27 @@ async def get_latest_events(
     return results
 
 
+ALL_SOURCES = ["osv.dev", "github-advisory", "pypi-rss", "socket.dev", "cisa-kev", "grok-x"]
+
+
 async def set_source_health(source: str, status: str) -> None:
     r = await get_redis()
     await r.set(
         f"{REDIS_SOURCE_HEALTH_PREFIX}{source}",
         json.dumps({"status": status, "last_check": int(time.time())}),
-        ex=600,  # expires if not refreshed in 10 min
+        ex=7200,  # 2 hours — covers hourly pollers
     )
 
 
 async def get_sources_health() -> dict[str, dict]:
     r = await get_redis()
-    keys = [k async for k in r.scan_iter(f"{REDIS_SOURCE_HEALTH_PREFIX}*")]
     result = {}
-    for key in keys:
-        source_name = key.removeprefix(REDIS_SOURCE_HEALTH_PREFIX)
-        raw = await r.get(key)
-        result[source_name] = json.loads(raw) if raw else {"status": "unknown"}
+    for source in ALL_SOURCES:
+        raw = await r.get(f"{REDIS_SOURCE_HEALTH_PREFIX}{source}")
+        if raw:
+            result[source] = json.loads(raw)
+        else:
+            result[source] = {"status": "unknown", "last_check": None}
     return result
 
 
