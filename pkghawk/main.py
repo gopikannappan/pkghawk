@@ -83,9 +83,13 @@ async def lifespan(app: FastAPI):
         scheduler.add_job(poll_grok, "interval", seconds=GROK_POLL_INTERVAL, id="grok")
         scheduler.start()
 
-        # Run initial polls
+        # Run all pollers once at startup
         asyncio.create_task(poll_osv())
         asyncio.create_task(poll_github_advisory())
+        asyncio.create_task(poll_pypi_new_packages())
+        asyncio.create_task(poll_socket_blog())
+        asyncio.create_task(poll_cisa_kev())
+        asyncio.create_task(poll_grok())
 
         yield
 
