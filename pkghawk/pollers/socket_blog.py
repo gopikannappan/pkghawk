@@ -39,7 +39,8 @@ async def poll_socket_blog() -> None:
     published = 0
 
     try:
-        async with httpx.AsyncClient(timeout=30) as client:
+        headers = {"User-Agent": "pkghawk/0.1 (https://pkghawk.dev)"}
+        async with httpx.AsyncClient(timeout=30, headers=headers) as client:
             resp = await client.get(SOCKET_BLOG_RSS)
             resp.raise_for_status()
 
