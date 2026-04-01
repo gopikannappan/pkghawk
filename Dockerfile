@@ -3,6 +3,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 COPY pyproject.toml .
+COPY pkghawk/ pkghawk/
 RUN pip install --no-cache-dir .
 
 COPY . .
