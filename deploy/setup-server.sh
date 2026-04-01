@@ -21,7 +21,7 @@ echo "=== Creating app directory ==="
 mkdir -p /opt/pkghawk
 
 echo "=== Done. Next steps: ==="
-echo "1. Clone repo:  cd /opt/pkghawk && git clone https://github.com/gk-monk/pkghawk ."
+echo "1. Clone repo:  cd /opt/pkghawk && git clone https://github.com/gopikannappan/pkghawk ."
 echo "2. Create env:  cp .env.example deploy/.env.prod && nano deploy/.env.prod"
 echo "3. Copy nginx:  cp deploy/nginx.conf /etc/nginx/sites-available/pkghawk"
 echo "4. Enable site: ln -sf /etc/nginx/sites-available/pkghawk /etc/nginx/sites-enabled/"
