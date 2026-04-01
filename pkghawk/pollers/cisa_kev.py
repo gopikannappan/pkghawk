@@ -36,8 +36,12 @@ async def poll_cisa_kev() -> None:
 
     try:
         headers = {"User-Agent": "pkghawk/0.1 (https://pkghawk.dev)"}
-        async with httpx.AsyncClient(timeout=30, headers=headers) as client:
+        async with httpx.AsyncClient(timeout=30, headers=headers, follow_redirects=True) as client:
             resp = await client.get(CISA_KEV_URL)
+            if resp.status_code == 403:
+                logger.debug("CISA KEV blocked (403) — likely WAF; skipping")
+                await set_source_health("cisa-kev", "unavailable")
+                return
             resp.raise_for_status()
 
         data = resp.json()

@@ -241,9 +241,9 @@ async def latest_events(
 async def health():
     """Health check with per-source status."""
     sources = await get_sources_health()
-    all_ok = all(s.get("status") == "ok" for s in sources.values()) if sources else True
+    has_error = any(s.get("status") == "error" for s in sources.values())
     return {
-        "status": "ok" if all_ok else "degraded",
+        "status": "degraded" if has_error else "ok",
         "sources": sources,
     }
 

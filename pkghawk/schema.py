@@ -78,4 +78,4 @@ class PkgHawkEvent(BaseModel):
 
     def dedup_key(self) -> str:
         """Key for deduplication — same package+ecosystem+type = same event."""
-        return f"{self.ecosystem}:{self.package}:{self.type}"
+        return f"{self.ecosystem.value}:{self.package}:{self.type.value}"
