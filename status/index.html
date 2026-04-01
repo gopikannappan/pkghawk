@@ -226,12 +226,23 @@
                     list.innerHTML = '<div class="source-row"><span class="source-name" style="color:#555">No sources reporting yet</span></div>';
                     return;
                 }
-                list.innerHTML = Object.entries(sources).map(([name, info]) => `
-                    <div class="source-row">
-                        <span><span class="dot dot-${info.status === 'ok' ? 'ok' : 'error'}"></span><span class="source-name">${name}</span></span>
-                        <span style="color:#555;font-size:0.75rem">${info.last_check ? new Date(info.last_check * 1000).toLocaleTimeString() : ''}</span>
-                    </div>
-                `).join('');
+                list.textContent = '';
+                Object.entries(sources).forEach(([name, info]) => {
+                    const row = document.createElement('div');
+                    row.className = 'source-row';
+                    const left = document.createElement('span');
+                    const dot = document.createElement('span');
+                    dot.className = `dot dot-${info.status === 'ok' ? 'ok' : 'error'}`;
+                    const sname = document.createElement('span');
+                    sname.className = 'source-name';
+                    sname.textContent = name;
+                    left.append(dot, sname);
+                    const time = document.createElement('span');
+                    time.style.cssText = 'color:#555;font-size:0.75rem';
+                    time.textContent = info.last_check ? new Date(info.last_check * 1000).toLocaleTimeString() : '';
+                    row.append(left, time);
+                    list.appendChild(row);
+                });
             } catch { /* ignore */ }
         }
 
@@ -244,18 +255,35 @@
                     list.innerHTML = '<div class="event-card"><span class="event-summary" style="color:#555">No events yet</span></div>';
                     return;
                 }
-                list.innerHTML = events.map(e => `
-                    <div class="event-card">
-                        <div class="event-header">
-                            <span class="badge severity-${e.severity}">${e.severity}</span>
-                            <span class="badge" style="background:#1e293b;color:#94a3b8">${e.type}</span>
-                            <span class="event-package">${e.package}</span>
-                            <span class="event-ecosystem">${e.ecosystem}</span>
-                        </div>
-                        <div class="event-summary">${e.summary || ''}</div>
-                        <div class="event-meta">${e.source} &middot; ${e.ts_iso || ''} &middot; confidence: ${e.confidence}</div>
-                    </div>
-                `).join('');
+                list.textContent = '';
+                events.forEach(e => {
+                    const card = document.createElement('div');
+                    card.className = 'event-card';
+                    const header = document.createElement('div');
+                    header.className = 'event-header';
+                    const sev = document.createElement('span');
+                    sev.className = `badge severity-${e.severity}`;
+                    sev.textContent = e.severity;
+                    const typ = document.createElement('span');
+                    typ.className = 'badge';
+                    typ.style.cssText = 'background:#1e293b;color:#94a3b8';
+                    typ.textContent = e.type;
+                    const pkg = document.createElement('span');
+                    pkg.className = 'event-package';
+                    pkg.textContent = e.package;
+                    const eco = document.createElement('span');
+                    eco.className = 'event-ecosystem';
+                    eco.textContent = e.ecosystem;
+                    header.append(sev, typ, pkg, eco);
+                    const summary = document.createElement('div');
+                    summary.className = 'event-summary';
+                    summary.textContent = e.summary || '';
+                    const meta = document.createElement('div');
+                    meta.className = 'event-meta';
+                    meta.textContent = `${e.source} \u00b7 ${e.ts_iso || ''} \u00b7 confidence: ${e.confidence}`;
+                    card.append(header, summary, meta);
+                    list.appendChild(card);
+                });
             } catch { /* ignore */ }
         }
 

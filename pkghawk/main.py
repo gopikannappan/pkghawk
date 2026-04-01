@@ -8,7 +8,7 @@ from pathlib import Path
 
 import redis.asyncio as aioredis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse
 from sse_starlette.sse import EventSourceResponse
 
@@ -41,6 +41,20 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+VALID_ECOSYSTEMS = {"npm", "pypi", "go", "maven", "cargo", "rubygems", "nuget"}
+VALID_SEVERITIES = {"critical", "high", "medium", "low", "unknown"}
+VALID_TYPES = {"malicious", "vuln", "typosquat", "hijack", "suspicious"}
+VALID_CONFIDENCES = {"critical", "high", "medium", "low"}
+
+
+def _validate_csv(value: str | None, allowed: set[str], name: str) -> None:
+    if value is None:
+        return
+    invalid = set(value.split(",")) - allowed
+    if invalid:
+        raise HTTPException(400, f"Invalid {name}: {', '.join(sorted(invalid))}. Allowed: {', '.join(sorted(allowed))}")
+
 
 scheduler = AsyncIOScheduler()
 
@@ -140,6 +154,10 @@ async def sse_feed(
     confidence: str | None = Query(None),
 ):
     """SSE feed of real-time package threat events."""
+    _validate_csv(ecosystem, VALID_ECOSYSTEMS, "ecosystem")
+    _validate_csv(severity, VALID_SEVERITIES, "severity")
+    _validate_csv(type, VALID_TYPES, "type")
+    _validate_csv(confidence, VALID_CONFIDENCES, "confidence")
     return EventSourceResponse(_event_stream(ecosystem, severity, type, confidence))
 
 
@@ -201,6 +219,10 @@ async def latest_events(
     since: int | None = Query(None),
 ):
     """Get the latest N events, optionally filtered."""
+    _validate_csv(ecosystem, VALID_ECOSYSTEMS, "ecosystem")
+    _validate_csv(severity, VALID_SEVERITIES, "severity")
+    _validate_csv(type, VALID_TYPES, "type")
+    _validate_csv(confidence, VALID_CONFIDENCES, "confidence")
     return await get_latest_events(
         n=n,
         ecosystem=ecosystem,

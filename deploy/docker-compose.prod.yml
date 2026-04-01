@@ -4,7 +4,7 @@ services:
     restart: always
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-pkghawk_redis_secret}
 
   app:
     build: ..
@@ -12,7 +12,7 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     environment:
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: redis://:${REDIS_PASSWORD:-pkghawk_redis_secret}@redis:6379/0
       LOG_LEVEL: info
     env_file: .env.prod
     depends_on:
