@@ -4,7 +4,7 @@ import logging
 
 import httpx
 
-from pkghawk.processing.deduplicator import process_event
+from pkghawk.processing.deduplicator import process_event, reset_poll_counter
 from pkghawk.processing.normalizer import normalize_osv
 from pkghawk.redis_client import set_source_health
 
@@ -47,6 +47,7 @@ MAL_ID_PREFIXES = ["MAL-2026-", "MAL-2025-"]
 
 async def poll_osv() -> None:
     """Poll OSV.dev for vulnerabilities on high-value packages and recent malware IDs."""
+    reset_poll_counter("osv.dev")
     published = 0
 
     try:

@@ -188,8 +188,15 @@ async def websocket_feed(
     types = set(type.split(",")) if type else None
     confidences = set(confidence.split(",")) if confidence else None
 
+    idle_timeout = 3600  # Close after 1 hour of no events
     try:
-        async for message in pubsub.listen():
+        while True:
+            message = await asyncio.wait_for(
+                pubsub.get_message(ignore_subscribe_messages=True, timeout=30),
+                timeout=idle_timeout,
+            )
+            if message is None:
+                continue
             if message["type"] != "message":
                 continue
             data = message["data"]
@@ -203,6 +210,8 @@ async def websocket_feed(
             if confidences and evt.get("confidence") not in confidences:
                 continue
             await ws.send_text(data)
+    except asyncio.TimeoutError:
+        await ws.close(code=1000, reason="Idle timeout")
     except WebSocketDisconnect:
         pass
     finally:

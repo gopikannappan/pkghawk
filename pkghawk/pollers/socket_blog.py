@@ -6,7 +6,7 @@ import re
 import feedparser
 import httpx
 
-from pkghawk.processing.deduplicator import process_event
+from pkghawk.processing.deduplicator import process_event, reset_poll_counter
 from pkghawk.redis_client import set_source_health
 from pkghawk.schema import (
     Confidence,
@@ -36,6 +36,7 @@ ECOSYSTEM_KEYWORDS: dict[str, Ecosystem] = {
 
 async def poll_socket_blog() -> None:
     """Poll Socket.dev blog RSS for supply chain attack writeups."""
+    reset_poll_counter("socket.dev")
     published = 0
 
     try:

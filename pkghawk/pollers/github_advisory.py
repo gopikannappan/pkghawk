@@ -5,7 +5,7 @@ import logging
 import httpx
 
 from pkghawk.config import GITHUB_TOKEN
-from pkghawk.processing.deduplicator import process_event
+from pkghawk.processing.deduplicator import process_event, reset_poll_counter
 from pkghawk.redis_client import set_source_health
 from pkghawk.schema import (
     Confidence,
@@ -40,6 +40,7 @@ SEVERITY_MAP: dict[str, Severity] = {
 
 async def poll_github_advisory() -> None:
     """Poll GitHub Advisory Database REST API for malware advisories."""
+    reset_poll_counter("github-advisory")
     published = 0
 
     try:

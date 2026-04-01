@@ -21,3 +21,6 @@ REDIS_SOURCE_HEALTH_PREFIX = "source:health:"
 # Event retention
 MAX_EVENTS = 10_000
 DEDUP_TTL_SECONDS = 86400  # 24 hours
+
+# Safety: max events a single poll cycle can emit (anomaly detection)
+MAX_EVENTS_PER_POLL = 50

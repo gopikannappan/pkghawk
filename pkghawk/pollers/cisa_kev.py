@@ -4,7 +4,7 @@ import logging
 
 import httpx
 
-from pkghawk.processing.deduplicator import process_event
+from pkghawk.processing.deduplicator import process_event, reset_poll_counter
 from pkghawk.redis_client import set_source_health
 from pkghawk.schema import (
     Confidence,
@@ -32,6 +32,7 @@ ECOSYSTEM_HINTS: dict[str, Ecosystem] = {
 
 async def poll_cisa_kev() -> None:
     """Poll CISA Known Exploited Vulnerabilities feed."""
+    reset_poll_counter("cisa-kev")
     published = 0
 
     try:

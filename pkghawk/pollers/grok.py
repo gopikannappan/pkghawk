@@ -6,7 +6,7 @@ import logging
 import httpx
 
 from pkghawk.config import XAI_API_KEY
-from pkghawk.processing.deduplicator import process_event
+from pkghawk.processing.deduplicator import process_event, reset_poll_counter
 from pkghawk.redis_client import set_source_health
 from pkghawk.schema import (
     Confidence,
@@ -59,6 +59,7 @@ Return [] if no concrete new threats found. No prose. No markdown. Raw JSON arra
 
 async def poll_grok() -> None:
     """Poll Grok/X for community intelligence on supply chain threats."""
+    reset_poll_counter("grok-x")
     if not XAI_API_KEY:
         logger.debug("Grok poller skipped: XAI_API_KEY not set")
         return

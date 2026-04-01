@@ -5,7 +5,7 @@ import logging
 import feedparser
 import httpx
 
-from pkghawk.processing.deduplicator import process_event
+from pkghawk.processing.deduplicator import process_event, reset_poll_counter
 from pkghawk.redis_client import set_source_health
 from pkghawk.schema import (
     Confidence,
@@ -66,6 +66,7 @@ def _edit_distance_one(a: str, b: str) -> bool:
 
 async def poll_pypi_new_packages() -> None:
     """Poll PyPI RSS for new packages that look like typosquats."""
+    reset_poll_counter("pypi-rss")
     published = 0
 
     try:
