@@ -10,6 +10,7 @@ import redis.asyncio as aioredis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 
 from pkghawk.config import (
@@ -275,6 +276,8 @@ async def stats():
 # --- Status Page ---
 
 STATUS_DIR = Path(__file__).parent.parent / "status"
+
+app.mount("/static", StaticFiles(directory=STATUS_DIR), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
