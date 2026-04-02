@@ -1,17 +1,46 @@
-# pkghawk — Security Backlog
+# pkghawk — Backlog
 
-## Input validation on query params
-Add enum validation for `ecosystem`, `severity`, `type`, `confidence` query parameters. Currently they're used in set-membership checks (no injection risk), but should reject invalid values with 400 instead of silently filtering nothing.
+## Done
+- ~~Input validation on query params~~
+- ~~Redis authentication~~
+- ~~XSS in status page~~
+- ~~Nginx hardening (server_tokens, security headers)~~
+- ~~Rate limiting~~
+- ~~Prompt injection sanitizer~~
+- ~~Event volume cap~~
+- ~~WebSocket idle timeout~~
+- ~~Dependency lockfile~~
 
-## Redis authentication
-Redis is Docker-internal only (not exposed to host), safe for now. Add `requirepass` in redis.conf when scaling to multiple nodes or if Redis is moved to a separate host.
+## Features
 
-## MCP endpoint authentication
-MCP tools are public (by design for a public feed). When `pkghawk_subscribe` (webhooks) ships in Phase 3, add HMAC token auth to prevent abuse.
+### POST /report endpoint
+Community-submitted threat signals with HMAC token auth. Manual review queue before publishing. Phase 3 priority.
 
-## XSS in status page
-`status/index.html` renders event data via innerHTML. A malicious advisory summary containing script tags could execute. Escape output with `textContent` or a sanitizer before rendering.
+### Cross-source corroboration
+When the same package appears from multiple sources within 60 minutes, automatically upgrade confidence level. Currently each source emits independently.
 
-## Nginx hardening
-- Add `server_tokens off` to hide Nginx version
-- Add security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy`
+### Grok/X poller activation
+Code exists, just needs XAI_API_KEY configured. Catches threats ~15min before structured sources.
+
+### Event expiry cleanup
+Redis sorted set grows unbounded. Add a periodic task to trim events older than 7 days.
+
+### Webhook delivery (pkghawk_subscribe)
+Allow persistent agents to register callback URLs for push notifications. Needs retry logic, URL validation, and auth.
+
+### Telegram/Discord bot
+Subscribe to ecosystem-filtered alerts via chat bot.
+
+### npm client package (pkghawk-client)
+One-liner integration for Node.js projects, similar to the Python client.
+
+## Launch
+
+### Show HN post
+"Show HN: pkghawk — free SSE feed for package supply chain attacks, MCP-ready". Time after the next high-profile attack.
+
+### awesome-mcp-servers listing
+Submit PR to awesome-mcp-servers repo.
+
+### Community distribution
+Post in Claude Code Discord, Cursor subreddit, Aider GitHub, TLDR Security, Risky Biz newsletter.
