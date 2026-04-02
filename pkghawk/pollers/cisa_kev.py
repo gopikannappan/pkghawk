@@ -16,7 +16,7 @@ from pkghawk.schema import (
 
 logger = logging.getLogger(__name__)
 
-CISA_KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+CISA_KEV_URL = "https://cisa-proxy.pkghawk.dev/"
 
 # CISA KEV doesn't map to specific ecosystems — we flag relevant ones
 ECOSYSTEM_HINTS: dict[str, Ecosystem] = {

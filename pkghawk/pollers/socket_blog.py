@@ -18,7 +18,7 @@ from pkghawk.schema import (
 
 logger = logging.getLogger(__name__)
 
-SOCKET_BLOG_RSS = "https://socket.dev/blog/rss.xml"
+SOCKET_BLOG_RSS = "https://socket.dev/api/blog/feed.atom"
 
 ECOSYSTEM_KEYWORDS: dict[str, Ecosystem] = {
     "npm": Ecosystem.NPM,

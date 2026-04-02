@@ -1,0 +1,8 @@
+name = "cisa-kev-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+workers_dev = false
+
+[[routes]]
+pattern = "cisa-proxy.pkghawk.dev/*"
+zone_id = "ee264332d487427d743c1bdc70591664"
