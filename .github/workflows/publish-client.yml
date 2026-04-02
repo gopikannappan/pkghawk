@@ -1,0 +1,34 @@
+name: Publish Client to PyPI
+
+on:
+  push:
+    tags:
+      - "client-v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Run tests
+        run: |
+          cd client
+          pip install -e ".[dev]"
+          pytest tests/ -v
+
+      - name: Build package
+        run: cd client && python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: cd client && twine upload dist/*
