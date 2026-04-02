@@ -10,7 +10,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "info")
 OSV_POLL_INTERVAL = 120
 GITHUB_POLL_INTERVAL = 300
 PYPI_POLL_INTERVAL = 120
-GROK_POLL_INTERVAL = 600
+GROK_POLL_INTERVAL = 2100  # 35min — fits ~$10/mo budget with grok-3
 
 # Redis keys
 REDIS_CHANNEL = "channel:alerts"
